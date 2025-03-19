@@ -1,0 +1,6 @@
+gdown
+pyshortcuts
+pyinstall
+pillow
+PyQt5
+ffmpeg
