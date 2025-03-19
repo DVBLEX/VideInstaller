@@ -1638,7 +1638,7 @@ class Application(QtWidgets.QMainWindow):
     progress_value_signal = QtCore.pyqtSignal(int)
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("VM_51")
+        self.setWindowTitle("Vide")
         self.setup_palette()
         self.template_path = None
         self.event_folder = None
