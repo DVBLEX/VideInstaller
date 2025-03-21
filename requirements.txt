@@ -4,3 +4,4 @@ pyinstall
 pillow
 PyQt5
 ffmpeg
+py2app

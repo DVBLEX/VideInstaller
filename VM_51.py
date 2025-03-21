@@ -2447,7 +2447,7 @@ def activate_and_install_packages(venv):
     pip_exe = os.path.join(venv, "Scripts", "pip") if os.name == "nt" else os.path.join(venv, "bin", "pip")
     subprocess.check_call([pip_exe, "install", "PyQt5", "Pillow"])
 
-create_virtual_environment()
-app = QtWidgets.QApplication(sys.argv)
-window = Application()
-sys.exit(app.exec_())
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    window = Application()
+    sys.exit(app.exec_())

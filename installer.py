@@ -1,59 +1,67 @@
+import os
+import platform
+import threading
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
-import os
 from pyshortcuts import make_shortcut
-import gdown
-import threading
+import shutil
+import sys
+
+if platform.system() == 'Darwin':
+    pass
+
 
 def run_app(app_path):
-    os.startfile(app_path)
+    if os.name == 'nt':  # Windows
+        os.startfile(app_path)
+    else:  # Mac/Linux
+        os.system(f'open "{app_path}"')
+
 
 def create_shortcut(app_folder_path):
     try:
-        app_path = os.path.join(app_folder_path, "Vide.exe")
-        icon_path = os.path.join(app_folder_path, "icon.ico")
+        app_extension = ".exe" if os.name == 'nt' else ".app"
+        app_path = os.path.join(app_folder_path, f"Vide{app_extension}")
+        icon_path = os.path.join(app_folder_path, "logo.ico")
         make_shortcut(app_path, name="Vide", desktop=True, icon=icon_path)
         return 1
     except Exception as e:
         print(e)
         return 0
-    
-def download_with_progress(app_folder_path, create_shortcut_flag, run_flag, progress_bar, status_label):
+
+
+def unzip_with_progress(app_folder_path, create_shortcut_flag, run_flag, progress_bar, status_label):
     try:
-        APP_ID = "1_R3T5Tf3GQC08WPNyLQZqYZ4HLViphwG"
-        ICON_ID = "1wIIvWh_UAtiabUWQuDQpKHmqFAPGqZwg"
-        FILE_URL = "https://drive.google.com/uc?id="
-        status_label.config(text="Fetching file info...")
-        root.update_idletasks()
+        if getattr(sys, 'frozen', False):
+            base_path = sys._MEIPASS  # PyInstaller extraction folder
+        else:
+            base_path = os.path.abspath(".")
+        
+        source_path = os.path.join(base_path, "Vide.exe")
+        shutil.copy(source_path, f"{app_folder_path}/Vide.exe")
 
-        app_url = FILE_URL + APP_ID
+        #Check file size after download
         app_path = os.path.join(app_folder_path, "Vide.exe")
-
-        # Download file in chunks
-        gdown.download(app_url, app_path, quiet=True, fuzzy=True)
-
-        # Check file size after download
         file_size = os.path.getsize(app_path)
         if file_size > 0:
             if create_shortcut_flag:
                 progress_bar["value"] = 80 
             else:
                 progress_bar["value"] = 100  # Set progress to 100% on completion
-                status_label.config(text="Download Complete ✅")
+                status_label.config(text="Installation Complete ✅")
 
         if create_shortcut_flag:
-            icon_path =  os.path.join(app_folder_path, "icon.ico")
+                source_path = os.path.join(base_path, "logo.ico")
+                shutil.copy(source_path, f"{app_folder_path}/logo.ico")
+                icon_path = os.path.join(app_folder_path, "logo.ico")
 
-            icon_url = FILE_URL + ICON_ID
-            gdown.download(icon_url,  icon_path, quiet=True, fuzzy=True)
+                file_size = os.path.getsize(icon_path)
+                if file_size > 0:
+                        progress_bar["value"] = 100  # Set progress to 100% on completion
+                        status_label.config(text="Installation Complete ✅")
 
-            file_size = os.path.getsize(icon_path)
-            if file_size > 0:
-                    progress_bar["value"] = 100  # Set progress to 100% on completion
-                    status_label.config(text="Download Complete ✅")
-
-            if create_shortcut(app_folder_path)!=1:
-                messagebox.showerror("Error", "Chortcut creation failed!")  #помилка створення посилання
+                if create_shortcut(app_folder_path)!=1:
+                    messagebox.showerror("Error", "Shortcut creation failed!")  # Shortcut creation failed!
 
         if run_flag:
             run_app(app_path)
@@ -63,16 +71,19 @@ def download_with_progress(app_folder_path, create_shortcut_flag, run_flag, prog
     except Exception as e:
         messagebox.showerror("Error", f"Download failed: {str(e)}")
 
+
 def download_app(app_folder_path, create_shortcut_flag, run_flag):
-
     progress_bar["value"] = 0
-    threading.Thread(target=download_with_progress, args=(app_folder_path, create_shortcut_flag, run_flag, progress_bar, status_label), daemon=True).start()
+    threading.Thread(target=unzip_with_progress,
+                     args=(app_folder_path, create_shortcut_flag, run_flag, progress_bar, status_label),
+                     daemon=True).start()
 
-    
+
 def choose_folder():
     folder_selected = filedialog.askdirectory(title="Select a folder")
     if folder_selected:
         entry_var.set(folder_selected)  # Set selected folder path in the text field
+
 
 def next_page():
     entry.grid_forget()
@@ -80,6 +91,7 @@ def next_page():
     checkbox_shortcut.grid_forget()
     checkbox_run.grid_forget()
     btn_continue.grid_forget()
+    select_folder_label.grid_forget()
     progress_bar.grid(row=0, column=0, padx=10, pady=10)
     status_label.grid(row=1, column=0, padx=10, pady=10)
 
@@ -96,46 +108,63 @@ def on_continue():
 
     else:
         messagebox.showerror("Error", "Please select folder!")
-        return()
+        return ()
     print(f"Selected Folder: {selected_folder}")
     print(f"Create desktop shortcut: {create_shortcut_flag}")
     print(f"Run app: {run_flag}")
 
-# Create the main window
-root = tk.Tk()
-root.title("Vide Installer")
-root.iconbitmap("./logo.ico")
-root.resizable(False, False)
 
-# Create a StringVar to hold the folder path
-entry_var = tk.StringVar()
+if __name__ == "__main__":
+    # Create the main window
+    root = tk.Tk()
+    root.title("Vide Installer")
+    root.resizable(False, False)
 
-# Entry field to show the selected folder path
-entry = tk.Entry(root, textvariable=entry_var, width=50)
-entry.grid(row=0, column=0, padx=10, pady=10)
+    # Handle icon loading with proper error handling
+    icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logo.ico")
+    try:
+        if os.path.exists(icon_path):
+            root.iconbitmap(icon_path)
+        else:
+            print(f"Warning: Icon file not found at {icon_path}")
+    except tk.TclError as e:
+        print(f"Warning: Could not load icon: {e}")
+    except Exception as e:
+        print(f"Warning: Unexpected error loading icon: {e}")
 
-# Button to open folder chooser
-btn_browse = tk.Button(root, text="Browse", command=choose_folder)
-btn_browse.grid(row=0, column=1, padx=5, pady=10)
 
-# Checkbox for "Create Desktop Shortcut"
-checkbox_shortcut_v = tk.BooleanVar()
-checkbox_shortcut = tk.Checkbutton(root, text="Create desktop shortcut", variable=checkbox_shortcut_v)
-checkbox_shortcut.grid(row=1, column=0, padx=10, pady=10,sticky="w")
+    select_folder_label = tk.Label(root, text="Please select folder :")
+    select_folder_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
-checkbox_run_v = tk.BooleanVar()
-checkbox_run = tk.Checkbutton(root, text="Run after installation", variable=checkbox_run_v)
-checkbox_run.grid(row=2, column=0, padx=10, pady=10,sticky="w")
+    # Create a StringVar to hold the folder path
+    entry_var = tk.StringVar()
 
-# Continue button (aligned bottom-right)
-btn_continue = tk.Button(root, text="Continue", command=on_continue)
-btn_continue.grid(row=3, column=1, padx=10, pady=10, sticky="e")
 
-#instalation progres bar
-progress_bar = ttk.Progressbar(root, length=300, mode="determinate")
+    # Entry field to show the selected folder path
+    entry = tk.Entry(root, textvariable=entry_var, width=50)
+    entry.grid(row=1, column=0, padx=10, pady=0)
 
-status_label = tk.Label(root, text="Waiting for download...", fg="blue")
+    # Button to open folder chooser
+    btn_browse = tk.Button(root, text="Browse", command=choose_folder)
+    btn_browse.grid(row=1, column=1, padx=5, pady=10)
 
-# Run the Tkinter event loop
-root.mainloop()
+    # Checkbox for "Create Desktop Shortcut"
+    checkbox_shortcut_v = tk.BooleanVar()
+    checkbox_shortcut = tk.Checkbutton(root, text="Create desktop shortcut", variable=checkbox_shortcut_v)
+    checkbox_shortcut.grid(row=2, column=0, padx=10, pady=10, sticky="w")
+
+    checkbox_run_v = tk.BooleanVar()
+    checkbox_run = tk.Checkbutton(root, text="Run after installation", variable=checkbox_run_v)
+    checkbox_run.grid(row=3, column=0, padx=10, pady=10, sticky="w")
+
+    # Continue button (aligned bottom-right)
+    btn_continue = tk.Button(root, text="Continue", command=on_continue)
+    btn_continue.grid(row=4, column=1, padx=10, pady=10, sticky="e")
+
+    # Installation progres bar
+    progress_bar = ttk.Progressbar(root, length=300, mode="determinate")
+
+    status_label = tk.Label(root, text="Waiting for download...", fg="blue")
+
+    root.mainloop()
 
