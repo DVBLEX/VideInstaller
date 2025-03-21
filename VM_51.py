@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
+import json
 import sys, os, subprocess, shutil, logging, re, random
 from datetime import datetime
 from functools import partial
@@ -10,6 +11,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from PIL import Image, ImageOps
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import pyqtSignal
+import requests
+
 
 # -----------------------------------------------------------------------------
 #                           CONSTANTS & GLOBALS
@@ -1638,6 +1641,8 @@ class Application(QtWidgets.QMainWindow):
     progress_value_signal = QtCore.pyqtSignal(int)
     def __init__(self):
         super().__init__()
+        icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logo.ico")
+        self.setWindowIcon(QtGui.QIcon(icon_path))
         self.setWindowTitle("Vide")
         self.setup_palette()
         self.template_path = None
@@ -1686,13 +1691,106 @@ class Application(QtWidgets.QMainWindow):
         main_layout.setSpacing(10)
         self.stack = QtWidgets.QStackedWidget()
         main_layout.addWidget(self.stack)
+        self.login_screen = QtWidgets.QWidget()
+        self.setup_login_screen_ui()
+        self.stack.addWidget(self.login_screen)
         self.screen1 = QtWidgets.QWidget()
         self.setup_screen1_ui()
         self.stack.addWidget(self.screen1)
         self.screen2 = QtWidgets.QWidget()
         self.setup_screen2_ui()
         self.stack.addWidget(self.screen2)
-        self.stack.setCurrentWidget(self.screen1)
+        self.stack.setCurrentWidget(self.login_screen)
+    def setup_login_screen_ui(self):
+        layout =  QtWidgets.QVBoxLayout(self.login_screen)
+        layout.setAlignment(QtCore.Qt.AlignCenter)
+        if getattr(sys, 'frozen', False):
+            base_path = sys._MEIPASS  # PyInstaller extraction folder
+        else:
+            base_path = os.path.abspath(".")
+        self.logo_png_path = os.path.join(base_path, "logo.png")
+        logo =  QtWidgets.QLabel(self)
+        pixmap =  QtGui.QPixmap(self.logo_png_path)
+        logo.setPixmap(pixmap)
+        logo.setAlignment( QtCore.Qt.AlignCenter)
+        logo.setScaledContents(True)  # Scale logo to fit
+        logo.setFixedSize(150, 100)  # Adjust logo size
+        layout.addWidget(logo, alignment=QtCore.Qt.AlignCenter)
+        title =  QtWidgets.QLabel("Hello Again!", self)
+        title.setFont( QtGui.QFont("Arial", 16, QtGui.QFont.Bold))
+        title.setAlignment( QtCore.Qt.AlignCenter)
+        layout.addWidget(title)
+        subtitle =  QtWidgets.QLabel("Welcome back you've been missed!", self)
+        subtitle.setFont(QtGui.QFont("Arial", 10))
+        subtitle.setAlignment(QtCore.Qt.AlignCenter)
+        layout.addWidget(subtitle)
+        self.email_input =  QtWidgets.QLineEdit(self)
+        self.email_input.setPlaceholderText("Email")
+        self.email_input.setFont(QtGui.QFont("Arial", 10))
+        self.email_input.setStyleSheet(
+            "padding: 10px; border: 1px solid gray; border-radius: 5px;  margin-right: 38px;"
+        )
+        layout.addWidget(self.email_input)
+        password_frame = QtWidgets.QFrame(self)
+        password_frame.setStyleSheet("border: none;")
+        password_layout = QtWidgets.QHBoxLayout()
+        password_layout.setContentsMargins(0, 0, 0, 0)
+        self.password_input = QtWidgets.QLineEdit(self)
+        self.password_input.setPlaceholderText("Password")
+        self.password_input.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.password_input.setFont( QtGui.QFont("Arial", 10))
+        self.password_input.setStyleSheet(
+            "padding: 10px; border: 1px solid gray; border-radius: 5px;"
+        )
+        password_layout.addWidget(self.password_input)
+        self.toggle_btn = QtWidgets.QPushButton("👁", self)
+        self.toggle_btn.setFixedSize(30, 30)
+        self.toggle_btn.setStyleSheet(
+            "border: none; background: transparent; font-size: 14px; margin-right: 5px;"
+        )
+        self.toggle_btn.clicked.connect(self.toggle_password)
+        password_layout.addWidget(self.toggle_btn)
+        password_frame.setLayout(password_layout)
+        layout.addWidget(password_frame)
+        signin_btn = QtWidgets.QPushButton("Sign In", self)
+        signin_btn.setFont( QtGui.QFont("Arial", 11, QtGui.QFont.Bold))
+        signin_btn.setStyleSheet(
+            "background-color: #e91e63; color: white; padding: 10px; border-radius: 5px;"
+        )
+        signin_btn.clicked.connect(self.sign_in)
+        layout.addWidget(signin_btn)
+       
+    def sign_in(self):
+        URL_BASE = "https://vide.website"
+        try:
+            self.email = self.email_input.text()
+            self.password = self.password_input.text()
+            data = {
+                "email" : f"{self.email}",
+                "password" : f"{self.password}"
+            }
+            url = f"{URL_BASE}/api/v1/token/"
+            response = requests.post(url,headers={"Content-Type": "application/json"}, json=data)
+            if response.status_code == 200:
+                json_response = response.json()
+                self.access_token = json_response.get("access")
+                self.refresh_token = json_response.get("refresh")
+                self.stack.setCurrentWidget(self.screen1)
+            else:
+                print(response.status_code)
+                print(response.json())
+                #raise Exception by codes
+        except Exception as e:
+            print(e)
+            #raise exception for general fail' 
+    def toggle_password(self):
+        """Toggle between visible and hidden password states."""
+        if self.password_input.echoMode() ==  QtWidgets.QLineEdit.Password:
+            self.password_input.setEchoMode( QtWidgets.QLineEdit.Normal)
+            self.toggle_btn.setText("🙈")  # Change to hidden emoji
+        else:
+            self.password_input.setEchoMode( QtWidgets.QLineEdit.Password)
+            self.toggle_btn.setText("👁")  # Change back to eye emoji
     def setup_screen1_ui(self):
         layout = QtWidgets.QVBoxLayout(self.screen1)
         layout.setAlignment(QtCore.Qt.AlignCenter)
@@ -2424,28 +2522,6 @@ class Application(QtWidgets.QMainWindow):
 # -----------------------------------------------------------------------------
 #                                   MAIN
 # -----------------------------------------------------------------------------
-def create_virtual_environment():
-    venv = os.path.join(os.getcwd(), "venv")
-    pyexe = sys.executable
-    if not os.path.isdir(venv):
-        print("Creating venv..")
-        subprocess.check_call([pyexe, "-m", "venv", "venv"])
-        activate_and_install_packages(venv)
-        vpy = os.path.join(venv, "Scripts", "python") if os.name == "nt" else os.path.join(venv, "bin", "python")
-        print("Restarting script under venv python..")
-        os.execv(vpy, [vpy] + sys.argv)
-    else:
-        try:
-            from PyQt5 import QtCore, QtGui, QtWidgets
-            from PIL import Image
-        except ImportError:
-            activate_and_install_packages(venv)
-            vpy = os.path.join(venv, "Scripts", "python") if os.name == "nt" else os.path.join(venv, "bin", "python")
-            os.execv(vpy, [vpy] + sys.argv)
-
-def activate_and_install_packages(venv):
-    pip_exe = os.path.join(venv, "Scripts", "pip") if os.name == "nt" else os.path.join(venv, "bin", "pip")
-    subprocess.check_call([pip_exe, "install", "PyQt5", "Pillow"])
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
