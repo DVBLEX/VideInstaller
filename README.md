@@ -2,21 +2,21 @@
 
 ## 1. Create a python virtual environment
 ```
-    python -m venv venv
-```    
+python -m venv venv
+```
 
 ## 2.  Activate virtual environment on Windows 
 ```
-    venv\Scripts\activate
+venv\Scripts\activate
 ```
 ## or MacOS
 ```
-    sh venv/bin/activate
+source venv/bin/activate
 ```
 
 ## 3. Install all the necessary modules 
 ```
-    pip install -r requirements.txt
+pip install -r requirements.txt
 ```   
 
 ## 4. Create executable file for installer
