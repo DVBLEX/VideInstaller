@@ -1,24 +1,25 @@
-#Compile Steps
-1. Create a python virtual environment
+# Compile Steps
+
+## 1. Create a python virtual environment
 ```
     python -m venv venv
 ```    
 
-2.  Activate virtual environment on Windows 
+## 2.  Activate virtual environment on Windows 
 ```
     venv\Scripts\activate
 ```
-or MacOS
+## or MacOS
 ```
     sh venv/bin/activate
 ```
 
-3. Install all the necessary modules 
+## 3. Install all the necessary modules 
 ```
     pip install -r requirements.txt
 ```   
 
-4. Create executable file for installer
+## 4. Create executable file for installer
 
 ### compile VM_51 
 pyinstaller --clean --onefile --noconsole --icon="logo.ico" --name="Vide" VM_51.py
