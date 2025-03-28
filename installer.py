@@ -21,9 +21,10 @@ def run_app(app_path):
 def create_shortcut(app_folder_path):
     try:
         app_extension = ".exe" if os.name == 'nt' else ".app"
+        icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logo.ico")
         app_path = os.path.join(app_folder_path, f"Vide{app_extension}")
-        icon_path = os.path.join(app_folder_path, "logo.ico")
-        make_shortcut(app_path, name="Vide", desktop=True, icon=icon_path)
+        if os.path.exists(icon_path):
+            make_shortcut(app_path, name="Vide", desktop=True, icon=icon_path)
         return 1
     except Exception as e:
         print(e)
@@ -52,17 +53,10 @@ def unzip_with_progress(app_folder_path, create_shortcut_flag, run_flag, progres
                 status_label.config(text="Installation Complete ✅")
 
         if create_shortcut_flag:
-            source_path = os.path.join(base_path, "logo.ico")
-            shutil.copy(source_path, f"{app_folder_path}/logo.ico")
-            icon_path = os.path.join(app_folder_path, "logo.ico")
-
-            file_size = os.path.getsize(icon_path)
-            if file_size > 0:
-                    progress_bar["value"] = 100  # Set progress to 100% on completion
-                    status_label.config(text="Installation Complete ✅")
-
             if create_shortcut(app_folder_path)!=1:
                 messagebox.showerror("Error", "Shortcut creation failed!") 
+                progress_bar["value"] = 100  # Set progress to 100% on completion
+                status_label.config(text="Installation Complete ✅")
             else:
                 progress_bar["value"] = 100  # Set progress to 100% on completion
                 status_label.config(text="Installation Complete ✅")
