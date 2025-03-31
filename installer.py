@@ -37,24 +37,24 @@ def unzip_with_progress(app_folder_path, create_shortcut_flag, run_flag, progres
             base_path = sys._MEIPASS  # PyInstaller extraction folder
         else:
             base_path = os.path.abspath(".")
-        
+
         app_extension = ".exe" if os.name == 'nt' else ".app"
         source_path = os.path.join(base_path, f"Vide{app_extension}")
         shutil.copy(source_path, f"{app_folder_path}/Vide{app_extension}")
 
-        #Check file size after download
+        # Check file size after download
         app_path = os.path.join(app_folder_path, f"Vide{app_extension}")
         file_size = os.path.getsize(app_path)
         if file_size > 0:
             if create_shortcut_flag:
-                progress_bar["value"] = 80 
+                progress_bar["value"] = 80
             else:
                 progress_bar["value"] = 100  # Set progress to 100% on completion
                 status_label.config(text="Installation Complete ✅")
 
         if create_shortcut_flag:
-            if create_shortcut(app_folder_path)!=1:
-                messagebox.showerror("Error", "Shortcut creation failed!") 
+            if create_shortcut(app_folder_path) != 1:
+                messagebox.showerror("Error", "Shortcut creation failed!")
                 progress_bar["value"] = 100  # Set progress to 100% on completion
                 status_label.config(text="Installation Complete ✅")
             else:
@@ -63,7 +63,7 @@ def unzip_with_progress(app_folder_path, create_shortcut_flag, run_flag, progres
 
         if run_flag:
             run_app(app_path)
-        
+
         root.destroy()
 
     except Exception as e:
@@ -111,6 +111,7 @@ def on_continue():
     print(f"Create desktop shortcut: {create_shortcut_flag}")
     print(f"Run app: {run_flag}")
 
+
 def on_start():
     greetings_label.grid_forget()
     start_btn.grid_forget()
@@ -140,40 +141,35 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Warning: Unexpected error loading icon: {e}")
 
-
     select_folder_label = tk.Label(root, text="Please select folder :")
-    
 
     # Create a StringVar to hold the folder path
     entry_var = tk.StringVar()
 
-
     # Entry field to show the selected folder path
     entry = tk.Entry(root, textvariable=entry_var, width=50)
-    
 
     # Button to open folder chooser
     btn_browse = tk.Button(root, text="Browse", command=choose_folder)
-    
 
     # Checkbox for "Create Desktop Shortcut"
     checkbox_shortcut_v = tk.BooleanVar()
     checkbox_shortcut = tk.Checkbutton(root, text="Create desktop shortcut", variable=checkbox_shortcut_v)
-    
 
     checkbox_run_v = tk.BooleanVar()
     checkbox_run = tk.Checkbutton(root, text="Run after installation", variable=checkbox_run_v)
-    
+
     # Continue button (aligned bottom-right)
     btn_continue = tk.Button(root, text="Continue", command=on_continue)
-   
+
     # installation progress bar
     progress_bar = ttk.Progressbar(root, length=300, mode="determinate")
-    
-    #Progress bar status label
+
+    # Progress bar status label
     status_label = tk.Label(root, text="Waiting for installation...", fg="blue")
 
-    greetings_label = tk.Label(root, text="You are greeted by the Vide installer,\n click the button to proceed with the installation process.",
+    greetings_label = tk.Label(root,
+                               text="You are greeted by the Vide installer,\n click the button to proceed with the installation process.",
                                font=12)
     greetings_label.grid(row=2, column=0, padx=10, pady=10)
 

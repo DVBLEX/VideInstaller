@@ -26,12 +26,12 @@ pyinstaller --clean --onefile --noconsole --icon="logo.ico" --name="Vide" VM_51.
 
 ### compile installer for Windows:
 ```
-pyinstaller --clean --noconsole --onefile --icon="logo.ico" --add-data "dist/Vide.exe;." --add-data "logo.ico;." --name="Vide Installer" installer.py
+pyinstaller --clean --noconsole --onefile --icon="logo.ico" --add-data "dist/Vide.exe;." --add-data "logo.ico;." --add-data "logo.png;." --name="Vide Installer"  installer_qt.py
 ```
 
 ### compile installer for Mac:
 ```
-pyinstaller --clean --noconsole --onefile --icon="logo.ico" --add-data "dist/Vide.app:." --add-data "logo.ico:." --name="Vide Installer" installer.py
+pyinstaller --clean --noconsole --onefile --icon="logo.ico" --add-data "dist/Vide.app:." --add-data "logo.ico:." --add-data "logo.png:." --name="Vide Installer" --windowed installer_qt.py
 ```
 
 ### for build .dmg or .pkg files:
@@ -46,7 +46,9 @@ hdiutil create -volname "Vide Installer" -srcfolder "dist/Vide Installer.app" -o
 
 ### for creating the .pkg file:
 ```
-pkgbuild --component "dist/Vide Installer.app" --install-location "/Applications" "dist/Vide_Installer.pkg"
+pyinstaller --clean --noconsole --onefile --icon="logo.ico" --add-data "dist/Vide.app:." --add-data "logo.ico:." --add-data "logo.png:." --name="Vide Installer" --windowed installer_qt.py
+
+pkgbuild --component "dist/Vide Installer.app" --install-location "/Applications" --scripts "scripts" --identifier "com.vide.installer" --version "1.0" "dist/Vide_Installer.pkg"
 ```
 
 5.  .exe or .dmg or .pkg file now is availabe at ./dist/
