@@ -36,11 +36,11 @@ pyinstaller --clean --noconsole --onefile --icon="logo.ico" --add-data "dist/Vid
 
 ### compile VM_51 
 ```
-pyinstaller --clean --noconsole --onefile --icon="logo.ico" --name="Vide" --windowed VM_51.py
+pyinstaller --clean --noconsole --onefile --icon="logo.icns" --name="Vide" --windowed VM_51.py
 ```
 ### compile VideInstaller
 ```
-pyinstaller --clean --noconsole --onefile --icon="logo.ico" --add-data "dist/Vide.app:." --add-data "logo.ico:." --add-data "logo.png:." --name="Vide Installer" --windowed installer_qt.py
+pyinstaller --clean --noconsole --onefile --icon="logo.icns" --add-data "dist/Vide.app:." --add-data "logo.icns:." --add-data "logo.icns:." --name="Vide Installer" --windowed installer_qt.py
 ```
 
 ### for build .dmg or .pkg files:
@@ -55,7 +55,7 @@ hdiutil create -volname "Vide Installer" -srcfolder "dist/Vide Installer.app" -o
 
 ### for creating the .pkg file:
 ```
-pyinstaller --clean --noconsole --onefile --icon="logo.ico" --add-data "dist/Vide.app:." --add-data "logo.ico:." --add-data "logo.png:." --name="Vide Installer" --windowed installer_qt.py
+pyinstaller --clean --noconsole --onefile --icon="logo.icns" --add-data "dist/Vide.app:." --add-data "logo.icns:." --add-data "logo.icns:." --name="Vide Installer" --windowed installer_qt.py
 ```
 
 ```

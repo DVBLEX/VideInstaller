@@ -2,10 +2,10 @@
 from setuptools import setup
 
 APP = ['installer.py']
-DATA_FILES = ['logo.ico']
+DATA_FILES = ['logo.icns']
 OPTIONS = {
     'argv_emulation': True,
-    'iconfile': 'logo.ico',
+    'iconfile': 'logo.icns',
     'plist': {
         'CFBundleName': "Vide Installer",
         'CFBundleDisplayName': "Vide Installer",
