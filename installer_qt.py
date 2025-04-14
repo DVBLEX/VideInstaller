@@ -1,12 +1,12 @@
-import os, sys, time 
-from PyQt5.QtWidgets import QApplication, QMainWindow,QStyleFactory, QWidget, QVBoxLayout, QStackedWidget, QLabel, QPushButton
+import os, sys, time
+from PyQt5.QtWidgets import QApplication, QMainWindow, QStyleFactory, QWidget, QVBoxLayout, QStackedWidget, QLabel, \
+    QPushButton
 from PyQt5.QtWidgets import QHBoxLayout, QCheckBox, QLineEdit, QFileDialog, QProgressBar
 from PyQt5.QtGui import QIcon, QPalette, QColor, QFont, QPixmap
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from pyshortcuts import make_shortcut
 import shutil
-
 
 LOGO_COLOR = "#EC1C5B"
 BACKGROUND_COLOR = "#1E1E1E"
@@ -16,6 +16,7 @@ TEXT_COLOR = "#FFFFFF"
 DEEP_PINK = "#EC1C5B"
 WHITE = "#FFFFFF"
 BLACK = "#000000"
+
 
 class ProgressThread(QThread):
     progress_updated = pyqtSignal(int)  # Signal to update progress bar
@@ -29,23 +30,23 @@ class ProgressThread(QThread):
 class Installer(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.comp=False
+        self.comp = False
         self.setWindowTitle("Vide Installer")
         if getattr(sys, 'frozen', False):
             base_path = sys._MEIPASS  # PyInstaller extraction folder
         else:
             base_path = os.path.abspath(".")
-        icon_path = os.path.join(base_path, "logo.ico")
+        ico_extension = ".ico" if os.name == 'nt' else ".icns"
+        icon_path = os.path.join(base_path, f"logo{ico_extension}")
         self.setWindowIcon(QIcon(icon_path))
-        self.setGeometry(100,100,600,400)
+        self.setGeometry(100, 100, 600, 400)
 
         self.setup_palette()
         self.setup_ui()
 
-
     def setup_palette(self):
         pal = QPalette()
-        pal.setColor(QPalette.Window,QColor(BACKGROUND_COLOR))
+        pal.setColor(QPalette.Window, QColor(BACKGROUND_COLOR))
         pal.setColor(QPalette.WindowText, QColor(TEXT_COLOR))
         pal.setColor(QPalette.Base, QColor(BUTTON_COLOR))
         pal.setColor(QPalette.AlternateBase, QColor(BUTTON_COLOR))
@@ -66,7 +67,7 @@ class Installer(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
-        main_layout.setContentsMargins(10,10,10,10)
+        main_layout.setContentsMargins(10, 10, 10, 10)
         main_layout.setSpacing(10)
         self.stack = QStackedWidget()
         main_layout.addWidget(self.stack)
@@ -82,7 +83,7 @@ class Installer(QMainWindow):
         self.stack.setCurrentWidget(self.welcome_screen)
 
     def setup_welcome_screen_ui(self):
-        layout =  QVBoxLayout(self.welcome_screen)
+        layout = QVBoxLayout(self.welcome_screen)
         layout.setAlignment(QtCore.Qt.AlignCenter)
         if getattr(sys, 'frozen', False):
             base_path = sys._MEIPASS  # PyInstaller extraction folder
@@ -92,15 +93,15 @@ class Installer(QMainWindow):
         logo = QLabel(self)
         pixmap = QPixmap(self.logo_png_path)
         logo.setPixmap(pixmap)
-        logo.setAlignment( QtCore.Qt.AlignCenter)
+        logo.setAlignment(QtCore.Qt.AlignCenter)
         logo.setScaledContents(True)  # Scale logo to fit
         logo.setFixedSize(150, 100)  # Adjust logo size
         layout.addWidget(logo, alignment=QtCore.Qt.AlignCenter)
         title =  QLabel("You are greeted by the Vide Installer!", self)
         title.setFont(QFont("Arial", 16, QFont.Bold))
-        title.setAlignment( QtCore.Qt.AlignCenter)
+        title.setAlignment(QtCore.Qt.AlignCenter)
         layout.addWidget(title)
-        subtitle =  QLabel("Click the button to proceed with the installation process.", self)
+        subtitle = QLabel("Click the button to proceed with the installation process.", self)
         subtitle.setFont(QFont("Arial", 10))
         subtitle.setAlignment(QtCore.Qt.AlignCenter)
         layout.addWidget(subtitle)
@@ -112,11 +113,11 @@ class Installer(QMainWindow):
         )
         start_btn.clicked.connect(self.start)
         layout.addWidget(start_btn)
-    
+
     def start(self):
         self.stack.setCurrentWidget(self.settings_screen)
         self.setGeometry(100, 100, 450, 250)
-    
+
     def setup_settings_screen_ui(self):
         layout = QVBoxLayout(self.settings_screen)
         layout.setContentsMargins(20, 20, 20, 20)
@@ -174,7 +175,8 @@ class Installer(QMainWindow):
     def create_shortcut(self, app_folder_path):
         try:
             app_extension = ".exe" if os.name == 'nt' else ".app"
-            icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logo.ico")
+            ico_extension = ".ico" if os.name == 'nt' else ".icns"
+            icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"logo{ico_extension}")
             app_path = os.path.join(app_folder_path, f"Vide{app_extension}")
             if os.path.exists(icon_path):
                 make_shortcut(app_path, name="Vide", desktop=True, icon=icon_path)

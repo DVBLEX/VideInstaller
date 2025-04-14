@@ -452,6 +452,7 @@ def process_file(file_name, file_type, unique_id, input_dir, output_dir):
             raise
         return out_path
 
+
 # -----------------------------------------------------------------------------
 #                           WORKER CLASSES
 # -----------------------------------------------------------------------------
@@ -476,7 +477,8 @@ class Worker(QtCore.QObject):
         try:
             self.progress_message.emit("Processing files...")
             self.output_directory = create_output_directory(self.event_folder)
-            self.paired_images = process_directory(self.input_folder, self.output_directory, progress_callback=self.update_prog)
+            self.paired_images = process_directory(self.input_folder, self.output_directory,
+                                                   progress_callback=self.update_prog)
             if self.stop_requested:
                 self.cleanup()
                 return
@@ -588,7 +590,9 @@ class CustomModeWorker(QtCore.QObject):
     progress_message = pyqtSignal(str)
     progress_value = pyqtSignal(int)
     process_stopped = pyqtSignal()
-    def __init__(self, files, event_folder, minimize, ratio, orientation, template_path, application, apply_template=False, do_crop=True):
+
+    def __init__(self, files, event_folder, minimize, ratio, orientation, template_path, application,
+                 apply_template=False, do_crop=True):
         super().__init__()
         self.files = files
         self.event_folder = event_folder
@@ -725,6 +729,7 @@ class CustomModeWorker(QtCore.QObject):
                 def _tmpl_prog(val):
                     self.progress_value.emit(val)
                     self.progress_message.emit(f"Applying templates... {val}%")
+
                 apply_templates(hr_list, self.template_path, template_out,
                                 position_adjustment_mm=self.application.template_position_adjustment,
                                 progress_callback=_tmpl_prog)
@@ -792,9 +797,9 @@ class ImagePreview(QtWidgets.QDialog):
         bg.setStyleSheet("background-color: rgba(0,0,0,180);")
         main_layout.addWidget(bg)
         big_lbl = QtWidgets.QLabel()
-        pm = QtGui.QPixmap(self.path).scaled(scr.width()-100, scr.height()-100,
-                                              QtCore.Qt.KeepAspectRatio,
-                                              QtCore.Qt.SmoothTransformation)
+        pm = QtGui.QPixmap(self.path).scaled(scr.width() - 100, scr.height() - 100,
+                                             QtCore.Qt.KeepAspectRatio,
+                                             QtCore.Qt.SmoothTransformation)
         big_lbl.setPixmap(pm)
         big_lbl.setAlignment(QtCore.Qt.AlignCenter)
         big_lbl.setStyleSheet("background-color: transparent;")
@@ -926,11 +931,11 @@ class DuplicatesDialog(QtWidgets.QDialog):
                 ac = crop_to_aspect_ratio(hi_img, NORMAL_RATIO)
             else:
                 ac = custom_crop(hi_img, self.ratio)
-            ac.thumbnail((1200,1200), Image.LANCZOS)
+            ac.thumbnail((1200, 1200), Image.LANCZOS)
             ac.save(photo_path, "JPEG", quality=85)
         except Exception as e:
             logging.error(f"Refresh error: {e}")
-        pm = QtGui.QPixmap(photo_path).scaled(150,150, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+        pm = QtGui.QPixmap(photo_path).scaled(150, 150, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         label_widget.setPixmap(pm)
     def set_all_copies(self):
         val = self.set_all_spin.value()
@@ -1388,7 +1393,7 @@ class PrintSelectionDialog(QtWidgets.QDialog):
         super().__init__(parent)
         self.setWindowTitle("Select Photos to Print")
         self.setModal(True)
-        self.resize(800,600)
+        self.resize(800, 600)
         self.output_folder = output_folder
         self.template_path = template_path
         self.photo_widgets = []
@@ -1641,7 +1646,8 @@ class Application(QtWidgets.QMainWindow):
     progress_value_signal = QtCore.pyqtSignal(int)
     def __init__(self):
         super().__init__()
-        icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logo.ico")
+        ico_extension = ".ico" if os.name == 'nt' else ".icns"
+        icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"logo{ico_extension}")
         self.setWindowIcon(QtGui.QIcon(icon_path))
         self.setWindowTitle("Vide")
         self.setup_palette()
@@ -1712,19 +1718,19 @@ class Application(QtWidgets.QMainWindow):
         logo =  QtWidgets.QLabel(self)
         pixmap =  QtGui.QPixmap(self.logo_png_path)
         logo.setPixmap(pixmap)
-        logo.setAlignment( QtCore.Qt.AlignCenter)
+        logo.setAlignment(QtCore.Qt.AlignCenter)
         logo.setScaledContents(True)  # Scale logo to fit
         logo.setFixedSize(150, 100)  # Adjust logo size
         layout.addWidget(logo, alignment=QtCore.Qt.AlignCenter)
-        title =  QtWidgets.QLabel("Hello Again!", self)
-        title.setFont( QtGui.QFont("Arial", 16, QtGui.QFont.Bold))
-        title.setAlignment( QtCore.Qt.AlignCenter)
+        title = QtWidgets.QLabel("Hello Again!", self)
+        title.setFont(QtGui.QFont("Arial", 16, QtGui.QFont.Bold))
+        title.setAlignment(QtCore.Qt.AlignCenter)
         layout.addWidget(title)
-        subtitle =  QtWidgets.QLabel("Welcome back you've been missed!", self)
+        subtitle = QtWidgets.QLabel("Welcome back you've been missed!", self)
         subtitle.setFont(QtGui.QFont("Arial", 10))
         subtitle.setAlignment(QtCore.Qt.AlignCenter)
         layout.addWidget(subtitle)
-        self.email_input =  QtWidgets.QLineEdit(self)
+        self.email_input = QtWidgets.QLineEdit(self)
         self.email_input.setPlaceholderText("Email")
         self.email_input.setFont(QtGui.QFont("Arial", 10))
         self.email_input.setStyleSheet(
@@ -1738,7 +1744,7 @@ class Application(QtWidgets.QMainWindow):
         self.password_input = QtWidgets.QLineEdit(self)
         self.password_input.setPlaceholderText("Password")
         self.password_input.setEchoMode(QtWidgets.QLineEdit.Password)
-        self.password_input.setFont( QtGui.QFont("Arial", 10))
+        self.password_input.setFont(QtGui.QFont("Arial", 10))
         self.password_input.setStyleSheet(
             "padding: 10px; border: 1px solid gray; border-radius: 5px;"
         )
@@ -1753,24 +1759,24 @@ class Application(QtWidgets.QMainWindow):
         password_frame.setLayout(password_layout)
         layout.addWidget(password_frame)
         signin_btn = QtWidgets.QPushButton("Sign In", self)
-        signin_btn.setFont( QtGui.QFont("Arial", 11, QtGui.QFont.Bold))
+        signin_btn.setFont(QtGui.QFont("Arial", 11, QtGui.QFont.Bold))
         signin_btn.setStyleSheet(
             "background-color: #e91e63; color: white; padding: 10px; border-radius: 5px;"
         )
         signin_btn.clicked.connect(self.sign_in)
         layout.addWidget(signin_btn)
-       
+
     def sign_in(self):
         URL_BASE = "https://vide.website"
         try:
             self.email = self.email_input.text()
             self.password = self.password_input.text()
             data = {
-                "email" : f"{self.email}",
-                "password" : f"{self.password}"
+                "email": f"{self.email}",
+                "password": f"{self.password}"
             }
             url = f"{URL_BASE}/api/v1/token/"
-            response = requests.post(url,headers={"Content-Type": "application/json"}, json=data)
+            response = requests.post(url, headers={"Content-Type": "application/json"}, json=data)
             if response.status_code == 200:
                 json_response = response.json()
                 self.access_token = json_response.get("access")
@@ -1779,17 +1785,18 @@ class Application(QtWidgets.QMainWindow):
             else:
                 print(response.status_code)
                 print(response.json())
-                #raise Exception by codes
+                # raise Exception by codes
         except Exception as e:
             print(e)
-            #raise exception for general fail' 
+            # raise exception for general fail'
+
     def toggle_password(self):
         """Toggle between visible and hidden password states."""
-        if self.password_input.echoMode() ==  QtWidgets.QLineEdit.Password:
-            self.password_input.setEchoMode( QtWidgets.QLineEdit.Normal)
+        if self.password_input.echoMode() == QtWidgets.QLineEdit.Password:
+            self.password_input.setEchoMode(QtWidgets.QLineEdit.Normal)
             self.toggle_btn.setText("🙈")  # Change to hidden emoji
         else:
-            self.password_input.setEchoMode( QtWidgets.QLineEdit.Password)
+            self.password_input.setEchoMode(QtWidgets.QLineEdit.Password)
             self.toggle_btn.setText("👁")  # Change back to eye emoji
     def setup_screen1_ui(self):
         layout = QtWidgets.QVBoxLayout(self.screen1)
@@ -1798,22 +1805,25 @@ class Application(QtWidgets.QMainWindow):
         logo_lbl = QtWidgets.QLabel()
         px = QtGui.QPixmap("logo.png")
         if not px.isNull():
-            px = px.scaled(200,100, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+            px = px.scaled(200, 100, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
             logo_lbl.setPixmap(px)
         logo_lbl.setAlignment(QtCore.Qt.AlignCenter)
         layout.addWidget(logo_lbl)
         self.event_name_edit = QtWidgets.QLineEdit()
         self.event_name_edit.setPlaceholderText("Enter event name")
-        self.event_name_edit.setStyleSheet(f"font-size:12px; color:{TEXT_COLOR}; background-color:{BUTTON_COLOR}; border:1px solid {TEXT_COLOR}; padding:6px; border-radius:5px;")
+        self.event_name_edit.setStyleSheet(
+            f"font-size:12px; color:{TEXT_COLOR}; background-color:{BUTTON_COLOR}; border:1px solid {TEXT_COLOR}; padding:6px; border-radius:5px;")
         layout.addWidget(self.event_name_edit)
         self.event_date_edit = QtWidgets.QLineEdit()
         self.event_date_edit.setPlaceholderText("YYYY-MM-DD")
-        self.event_date_edit.setStyleSheet(f"font-size:12px; color:{TEXT_COLOR}; background-color:{BUTTON_COLOR}; border:1px solid {TEXT_COLOR}; padding:6px; border-radius:5px;")
+        self.event_date_edit.setStyleSheet(
+            f"font-size:12px; color:{TEXT_COLOR}; background-color:{BUTTON_COLOR}; border:1px solid {TEXT_COLOR}; padding:6px; border-radius:5px;")
         self.event_date_edit.setText(datetime.now().strftime("%Y-%m-%d"))
         layout.addWidget(self.event_date_edit)
         self.template_combo = QtWidgets.QComboBox()
         self.template_combo.addItems(list(TEMPLATES.keys()))
-        self.template_combo.setStyleSheet(f"font-size:12px; color:{TEXT_COLOR}; background-color:{BUTTON_COLOR}; border:1px solid {TEXT_COLOR}; padding:6px; border-radius:5px;")
+        self.template_combo.setStyleSheet(
+            f"font-size:12px; color:{TEXT_COLOR}; background-color:{BUTTON_COLOR}; border:1px solid {TEXT_COLOR}; padding:6px; border-radius:5px;")
         layout.addWidget(self.template_combo)
         create_btn = QtWidgets.QPushButton("Create Event")
         create_btn.setStyleSheet(f"""
@@ -1856,7 +1866,7 @@ class Application(QtWidgets.QMainWindow):
         logo_lbl = QtWidgets.QLabel()
         px = QtGui.QPixmap("logo.png")
         if not px.isNull():
-            px = px.scaled(200,100, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+            px = px.scaled(200, 100, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
             logo_lbl.setPixmap(px)
         logo_lbl.setAlignment(QtCore.Qt.AlignCenter)
         layout.addWidget(logo_lbl)
@@ -1976,11 +1986,12 @@ class Application(QtWidgets.QMainWindow):
         layout.addWidget(self.custom_mode_button)
         sessions_container = QtWidgets.QWidget()
         sessions_layout = QtWidgets.QVBoxLayout(sessions_container)
-        sessions_layout.setContentsMargins(0,0,0,0)
+        sessions_layout.setContentsMargins(0, 0, 0, 0)
         sessions_layout.setSpacing(0)
         self.sessions_table = QtWidgets.QTableWidget()
         self.sessions_table.setColumnCount(7)
-        self.sessions_table.setHorizontalHeaderLabels(["Session #", "Targets", "Prints", "Open Folder", "Print All", "Print Selected", "Delete"])
+        self.sessions_table.setHorizontalHeaderLabels(
+            ["Session #", "Targets", "Prints", "Open Folder", "Print All", "Print Selected", "Delete"])
         self.sessions_table.horizontalHeader().setStretchLastSection(True)
         self.sessions_table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.sessions_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
@@ -2088,6 +2099,7 @@ class Application(QtWidgets.QMainWindow):
         settings_btn.clicked.connect(self.open_settings)
         btn_layout.addWidget(settings_btn)
         layout.addLayout(btn_layout)
+
     def create_event_folder(self):
         en = self.event_name_edit.text()
         ed = self.event_date_edit.text()
@@ -2103,6 +2115,7 @@ class Application(QtWidgets.QMainWindow):
             f.write(f"Template: {current_template}\n")
         self.message_signal.emit("Event Created", "Event folder created.")
         self.stack.setCurrentWidget(self.screen2)
+
     def open_existing_event(self):
         d = QtWidgets.QFileDialog.getExistingDirectory(self, "Select Event Folder", os.path.expanduser("~/Downloads"))
         if d:
@@ -2115,20 +2128,24 @@ class Application(QtWidgets.QMainWindow):
             else:
                 self.template_path = None
             self.stack.setCurrentWidget(self.screen2)
+
     def upload_template(self):
         if not self.event_folder:
             self.error_signal.emit("Error", "Please create/open an event first.")
             return
-        fp, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Select Template", os.path.expanduser("~/Downloads"), "Image Files (*.png *.jpg *.jpeg)")
+        fp, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Select Template", os.path.expanduser("~/Downloads"),
+                                                      "Image Files (*.png *.jpg *.jpeg)")
         if fp:
             self.template_path = fp
             shutil.copy(fp, os.path.join(self.event_folder, os.path.basename(fp)))
             self.message_signal.emit("Template Uploaded", "Template uploaded successfully.")
+
     def browse_folder(self):
         f = QtWidgets.QFileDialog.getExistingDirectory(self, "Select Input Folder", os.path.expanduser("~/Downloads"))
         if f:
             self.input_folder = f
             self.folder_line_edit.setText(f)
+
     def start_processing(self):
         if not self.event_folder:
             self.error_signal.emit("Error", "Please create an event first.")
@@ -2176,14 +2193,17 @@ class Application(QtWidgets.QMainWindow):
         self.worker.process_stopped.connect(self.process_stopped)
         self.duplicates_ready.connect(self.worker.process_duplicates)
         self.worker_thread.start()
+
     def stop_processing(self):
-        ans = QtWidgets.QMessageBox.question(self, "Stop Process", "Are you sure? This deletes partial data.", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+        ans = QtWidgets.QMessageBox.question(self, "Stop Process", "Are you sure? This deletes partial data.",
+                                             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         if ans == QtWidgets.QMessageBox.Yes:
             if self.worker:
                 self.worker.stop()
             self.worker_thread.quit()
             self.worker_thread.wait()
             self.delete_current_session()
+
     def delete_current_session(self):
         self.input_folder = None
         self.folder_line_edit.clear()
@@ -2194,14 +2214,17 @@ class Application(QtWidgets.QMainWindow):
         self.custom_mode_button.setEnabled(True)
         self.message_signal.emit("Process Stopped", "Session removed.")
         self.refresh_application()
+
     def process_stopped(self):
         self.start_button.setVisible(True)
         self.stop_button.setVisible(False)
         self.custom_mode_button.setEnabled(True)
+
     def on_worker_error(self, msg):
         self.error_signal.emit("Error", msg)
         self.reset_progress()
         self.refresh_application()
+
     def on_show_duplicates_dialog(self, out_dir, paired_imgs):
         dlg = DuplicatesDialog(self, out_dir, paired_imgs, ratio=NORMAL_RATIO)
         r = dlg.exec_()
@@ -2210,6 +2233,7 @@ class Application(QtWidgets.QMainWindow):
             self.duplicates_ready.emit(dups)
         else:
             self.worker.stop()
+
     def processing_complete(self):
         self.loading_label.setText("Complete")
         self.reset_progress()
@@ -2218,16 +2242,20 @@ class Application(QtWidgets.QMainWindow):
         self.start_button.setVisible(True)
         self.stop_button.setVisible(False)
         self.custom_mode_button.setEnabled(True)
+
     def reset_progress(self):
         self.progress_bar.setVisible(False)
         self.loading_label.setText("")
+
     def update_progress_message(self, msg):
         self.loading_label.setText(msg)
+
     def update_progress_value(self, val):
         if not self.progress_bar.isVisible():
             self.progress_bar.setVisible(True)
             self.progress_bar.setMaximum(100)
         self.progress_bar.setValue(val)
+
     def update_sessions_table(self):
         self.sessions_table.setRowCount(0)
         total_targets = 0
@@ -2240,7 +2268,8 @@ class Application(QtWidgets.QMainWindow):
             total_prints += pr
             row = self.sessions_table.rowCount()
             self.sessions_table.insertRow(row)
-            session_item = QtWidgets.QTableWidgetItem(f"Session {idx}" + (" (custom)" if sn.get("custom", False) else ""))
+            session_item = QtWidgets.QTableWidgetItem(
+                f"Session {idx}" + (" (custom)" if sn.get("custom", False) else ""))
             session_item.setTextAlignment(QtCore.Qt.AlignCenter)
             self.sessions_table.setItem(row, 0, session_item)
             targets_item = QtWidgets.QTableWidgetItem(str(tg))
@@ -2283,6 +2312,7 @@ class Application(QtWidgets.QMainWindow):
         self.summary_label.setText(f"Total Targets: {total_targets} | Total Prints: {total_prints}")
         sb = self.sessions_table.verticalScrollBar()
         sb.setValue(sb.maximum())
+
     def open_folder(self, idx):
         out_f = sessions[idx]["output"]
         if os.path.exists(out_f):
@@ -2292,10 +2322,12 @@ class Application(QtWidgets.QMainWindow):
                 subprocess.run(["open", out_f])
             else:
                 subprocess.run(["xdg-open", out_f])
+
     def print_session(self, idx):
         out_f = sessions[idx]["output"]
         t_out = os.path.join(out_f, "template_output")
         open_print_dialog(t_out)
+
     def print_selected_photos(self, idx):
         out_f = sessions[idx]["output"]
         dlg = PrintSelectionDialog(self, out_f, self.template_path)
@@ -2307,6 +2339,7 @@ class Application(QtWidgets.QMainWindow):
                 open_print_dialog(new_dir)
             else:
                 QtWidgets.QMessageBox.warning(self, "No Selection", "No photos were selected.")
+
     def create_template_output_folder(self, outf):
         i = 1
         while True:
@@ -2315,6 +2348,7 @@ class Application(QtWidgets.QMainWindow):
                 os.makedirs(nd)
                 return nd
             i += 1
+
     def apply_template_to_selected_photos(self, selected_photos, copies_dict, tmpl_out):
         digi_photos = os.path.join(self.event_folder, "digital", "photos")
         photos_paths = []
@@ -2323,7 +2357,7 @@ class Application(QtWidgets.QMainWindow):
             for i in range(c):
                 if c > 1:
                     base, ext = os.path.splitext(os.path.basename(p))
-                    copy_name = f"{base}_copy{i+1}{ext}"
+                    copy_name = f"{base}_copy{i + 1}{ext}"
                     cp = os.path.join(os.path.dirname(p), copy_name)
                     shutil.copy(p, cp)
                     photos_paths.append(cp)
@@ -2356,8 +2390,10 @@ class Application(QtWidgets.QMainWindow):
                     os.remove(x)
                 except:
                     pass
+
     def delete_session(self, idx):
-        ans = QtWidgets.QMessageBox.question(self, "Delete Session", "Are you sure?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+        ans = QtWidgets.QMessageBox.question(self, "Delete Session", "Are you sure?",
+                                             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         if ans == QtWidgets.QMessageBox.Yes:
             s = sessions[idx]
             out_f = s["output"]
@@ -2369,6 +2405,7 @@ class Application(QtWidgets.QMainWindow):
             del sessions[idx]
             update_event_data(self)
             self.update_sessions_table()
+
     def open_custom_mode(self):
         if not self.event_folder:
             self.error_signal.emit("Error", "Please create or open an event first.")
@@ -2376,6 +2413,7 @@ class Application(QtWidgets.QMainWindow):
         dlg = CustomModeDialog(self)
         dlg.exec_()
         self.update_sessions_table()
+
     def open_settings(self):
         dlg = QtWidgets.QDialog(self)
         dlg.setWindowTitle("Settings")
@@ -2441,20 +2479,24 @@ class Application(QtWidgets.QMainWindow):
         save_btn.clicked.connect(lambda: self.save_settings(dlg))
         l.addWidget(save_btn)
         dlg.exec_()
+
     def decrease_adjust(self):
         if self.template_position_adjustment > -2.5:
             self.template_position_adjustment -= 0.5
             self.adjust_label.setText(f"{self.template_position_adjustment} mm")
+
     def increase_adjust(self):
         if self.template_position_adjustment < 2.5:
             self.template_position_adjustment += 0.5
             self.adjust_label.setText(f"{self.template_position_adjustment} mm")
+
     def save_settings(self, dlg):
         global template_position_adjustment
         template_position_adjustment = self.template_position_adjustment
         logging.info(f"Template position => {template_position_adjustment} mm")
         self.message_signal.emit("Settings Saved", "Template position updated.")
         dlg.accept()
+
     def refresh_application(self):
         self.input_folder = None
         self.folder_line_edit.clear()
@@ -2468,6 +2510,7 @@ class Application(QtWidgets.QMainWindow):
         self.stop_button.setEnabled(False)
         self.message_signal.emit("Refreshed", "Ready to go.")
         self.update_sessions_table()
+
     def show_custom_error(self, title, msg):
         mb = QtWidgets.QMessageBox(self)
         mb.setIcon(QtWidgets.QMessageBox.Critical)
@@ -2490,6 +2533,7 @@ class Application(QtWidgets.QMainWindow):
         """)
         mb.exec_()
         self.reset_progress()
+
     def show_custom_message(self, title, msg):
         mb = QtWidgets.QMessageBox(self)
         mb.setIcon(QtWidgets.QMessageBox.Information)
@@ -2511,13 +2555,16 @@ class Application(QtWidgets.QMainWindow):
             }}
         """)
         mb.exec_()
+
     def closeEvent(self, event):
-        ans = QtWidgets.QMessageBox.question(self, "Quit?", "Do you want to quit?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+        ans = QtWidgets.QMessageBox.question(self, "Quit?", "Do you want to quit?",
+                                             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         if ans == QtWidgets.QMessageBox.Yes:
             event.accept()
             sys.exit()
         else:
             event.ignore()
+
 
 # -----------------------------------------------------------------------------
 #                                   MAIN
