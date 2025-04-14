@@ -36,7 +36,7 @@ pyinstaller --clean --noconsole --onefile --icon="logo.ico" --add-data "dist/Vid
 
 ### compile VM_51 
 ```
-pyinstaller --clean --noconsole --onefile --icon="logo.icns" --add-data="logo.icns;." --name="Vide" --windowed VM_51.py
+pyinstaller --clean --noconsole --onefile --icon="logo.icns" --add-data="logo.icns:." --name="Vide" --windowed VM_51.py
 ```
 ### compile VideInstaller
 ```
