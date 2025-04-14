@@ -1647,7 +1647,11 @@ class Application(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         ico_extension = ".ico" if os.name == 'nt' else ".icns"
-        icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"logo{ico_extension}")
+        if getattr(sys, 'frozen', False):
+            base_path = sys._MEIPASS
+        else:
+            base_path = os.path.dirname(os.path.abspath(__file__))
+        icon_path = os.path.join(base_path, f"logo{ico_extension}")
         self.setWindowIcon(QtGui.QIcon(icon_path))
         self.setWindowTitle("Vide")
         self.setup_palette()
